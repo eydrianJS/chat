@@ -1,25 +1,33 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { Container } from '@material-ui/core';
+import Box from '@material-ui/core/Box/Box';
+import { useRef } from 'react';
+import { Route } from 'react-router-dom';
+import Login from './components/Login/Login';
+import Register from './components/Register/Register';
+import routeBuilders from './shared/routeBuilders';
+import './shared/styles/globalStyles.css';
+import background from './shared/assets/cloud-chat-bg.svg';
 
 function App() {
+  const routes = useRef({
+    login: routeBuilders.login(),
+    register: routeBuilders.register(),
+  }).current;
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Container maxWidth='lg' style={{ display: 'flex' }}>
+      <Route exact path={routes.register}>
+        <Register />
+      </Route>
+      <Route path={routes.login}>
+        <Login />
+      </Route>
+      <Box
+        flex='1'
+        className='background'
+        style={{ backgroundImage: `url(${background})` }}
+      />
+    </Container>
   );
 }
 
