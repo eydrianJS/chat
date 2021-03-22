@@ -9,6 +9,7 @@ import * as Yup from 'yup';
 import useStyles from '../../shared/styles/Auth.styles';
 import { useFormik } from 'formik';
 import { useCallback } from 'react';
+import Background from '../Background/Background';
 
 const Login = () => {
   const classes = useStyles();
@@ -39,67 +40,70 @@ const Login = () => {
   }, []);
 
   return (
-    <Box className={classes.formElementsContainer} component='form'>
-      <Box
-        m={4}
-        display='flex'
-        justifyContent='flex-start'
-        flexDirection='column'
-      >
-        <Typography variant='h4' className={classes.authHeader}>
-          Sign in | <span>Azure Cloud Chat</span>
-        </Typography>
-        <p className={classes.authSubHeader}>
-          Log in with your data that you entered during registration.
-        </p>
+    <>
+      <Box className={classes.formElementsContainer} component='form'>
+        <Box
+          m={4}
+          display='flex'
+          justifyContent='flex-start'
+          flexDirection='column'
+        >
+          <Typography variant='h4' className={classes.authHeader}>
+            Sign in | <span>Azure Cloud Chat</span>
+          </Typography>
+          <p className={classes.authSubHeader}>
+            Log in with your data that you entered during registration.
+          </p>
+        </Box>
+        <TextField
+          id='name'
+          name='name'
+          label='Username'
+          value={formik.values.name}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          error={displayErrorInput(formik.touched.name, formik.errors.name)}
+          helperText={formik.errors.name}
+          placeholder='Enter your username...'
+          variant='outlined'
+          required
+        />
+        <TextField
+          id='password'
+          name='password'
+          label='Password'
+          type='password'
+          value={formik.values.password}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+          error={displayErrorInput(
+            formik.touched.password,
+            formik.errors.password
+          )}
+          helperText={formik.errors.password}
+          placeholder='Enter your password...'
+          variant='outlined'
+          required
+        />
+        <Button
+          color='primary'
+          variant='contained'
+          size='large'
+          className={classes.button}
+          disableElevation
+          disabled={!(formik.isValid && formik.dirty)}
+        >
+          Login
+        </Button>
+        <Box className={classes.registerDescription}>
+          You don't have account?
+          <Link to={routeBuilders.register()} className={classes.link}>
+            Sign up here
+          </Link>
+        </Box>
       </Box>
-      <TextField
-        id='name'
-        name='name'
-        label='Username'
-        value={formik.values.name}
-        onChange={formik.handleChange}
-        onBlur={formik.handleBlur}
-        error={displayErrorInput(formik.touched.name, formik.errors.name)}
-        helperText={formik.errors.name}
-        placeholder='Enter your username...'
-        variant='outlined'
-        required
-      />
-      <TextField
-        id='password'
-        name='password'
-        label='Password'
-        type='password'
-        value={formik.values.password}
-        onChange={formik.handleChange}
-        onBlur={formik.handleBlur}
-        error={displayErrorInput(
-          formik.touched.password,
-          formik.errors.password
-        )}
-        helperText={formik.errors.password}
-        placeholder='Enter your password...'
-        variant='outlined'
-        required
-      />
-      <Button
-        color='primary'
-        variant='contained'
-        size='large'
-        className={classes.button}
-        disableElevation
-        disabled={!(formik.isValid && formik.dirty)}
-      >
-        Login
-      </Button>
-      <Box className={classes.registerDescription}>
-        You don't have account?
-        <Link to={routeBuilders.register()} className={classes.link}>
-          Sign up here
-        </Link>
-      </Box>
-    </Box>
+      <Background />
+    </>
   );
 };
 

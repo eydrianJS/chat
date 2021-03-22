@@ -1,32 +1,24 @@
 import { Container } from '@material-ui/core';
-import Box from '@material-ui/core/Box/Box';
 import { useRef } from 'react';
-import { Route } from 'react-router-dom';
-import Login from './components/Login/Login';
-import Register from './components/Register/Register';
+import { Route, Switch } from 'react-router-dom';
+import Auth from './components/Auth/Auth';
 import routeBuilders from './shared/routeBuilders';
 import './shared/styles/globalStyles.css';
-import background from './shared/assets/cloud-chat-bg.svg';
+import Chat from './components/Chat/Chat';
 
 function App() {
   const routes = useRef({
-    login: routeBuilders.login(),
-    register: routeBuilders.register(),
+    chat: '/chat/room/:roomId',
   }).current;
 
   return (
-    <Container maxWidth='lg' style={{ display: 'flex' }}>
-      <Route exact path={routes.register}>
-        <Register />
-      </Route>
-      <Route path={routes.login}>
-        <Login />
-      </Route>
-      <Box
-        flex='1'
-        className='background'
-        style={{ backgroundImage: `url(${background})` }}
-      />
+    <Container maxWidth='lg' style={{ display: 'flex', height: '100vh' }}>
+      <Auth />
+      <Switch>
+        <Route path={routes.chat}>
+          <Chat />
+        </Route>
+      </Switch>
     </Container>
   );
 }

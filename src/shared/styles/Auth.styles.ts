@@ -1,5 +1,9 @@
 import { makeStyles } from '@material-ui/core';
 
+export const globalColors = {
+  main: '#17cc78',
+}
+
 const useStyles = makeStyles((theme) => ({
   authHeader: {
     fontWeight: 600,
