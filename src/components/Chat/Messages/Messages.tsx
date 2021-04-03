@@ -1,15 +1,16 @@
 import React from 'react';
+import { IMessageResponse } from '../../../shared/interfaces/IMessageResponse';
 import SingleMessage from './SingleMessage/SingleMessage';
 
 type Props = {
-  messages: string[];
+  messages: IMessageResponse[];
 };
 
 const Messages: React.FC<Props> = ({ messages }) => {
   return (
     <>
-      {messages.map((msg) => (
-        <SingleMessage text={msg} />
+      {messages.map((msg: IMessageResponse) => (
+        <SingleMessage message={msg} />
       ))}
     </>
   );

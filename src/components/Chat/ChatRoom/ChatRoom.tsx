@@ -1,10 +1,11 @@
 import { Box, Button, Divider, Grid, Typography } from '@material-ui/core';
 import React, { ChangeEvent, useEffect, useState } from 'react';
-import { useRouteMatch } from 'react-router';
 import InputMessage from '../InputMessage/InputMessage';
 import Messages from '../Messages/Messages';
 import useStyles from './ChatRoom.styles';
 import io from 'socket.io-client';
+import { IRoomResponse } from '../../../shared/interfaces/IRoomResponse';
+import { IMessageResponse } from '../../../shared/interfaces/IMessageResponse';
 
 let socket: SocketIOClient.Socket = io('localhost:8080', {
   transports: ['websocket', 'polling', 'flashsocket'],
@@ -13,21 +14,26 @@ let socket: SocketIOClient.Socket = io('localhost:8080', {
 const ChatRoom = () => {
   const classes = useStyles();
   const [messageField, setMessageField] = useState('');
-  const [messagesList, setMessagesList] = useState<any[]>([]);
+  const [messagesList, setMessagesList] = useState<IMessageResponse[]>([]);
+  const [roomData, setRoomData] = useState<IRoomResponse | undefined>(
+    undefined
+  );
 
   const handleMessage = (event: ChangeEvent<HTMLInputElement>) =>
     setMessageField(event.target.value);
 
   useEffect(() => {
-    socket.on('chatHistory', (messages: any) => {
-      console.log(messages);
+    socket.on('chatHistory', (messages: IMessageResponse[]) => {
       setMessagesList((messagesList) => [...messagesList, ...messages]);
     });
+    socket.on('roomUsers', (obj: IRoomResponse) => setRoomData(obj));
   }, []);
 
   useEffect(() => {
     socket.emit('joinToPublicRoom', { userId: '60571a776db2a42e1257abef' });
-    socket.on('message', (obj: any) => console.log(obj));
+    socket.on('message', (messages: IMessageResponse) => {
+      setMessagesList((messagesList) => [...messagesList, messages]);
+    });
   }, []);
 
   const handleSubmit = (event: any) => {
@@ -37,13 +43,11 @@ const ChatRoom = () => {
     }
   };
 
-  console.log(messagesList);
-
   return (
     <Grid container direction='column' className={classes.chatRoomContainer}>
       <Grid item className={classes.infoBarContainer}>
         <Typography variant='h5' style={{ fontWeight: 700 }}>
-          Fancy Room
+          {roomData?.room}
         </Typography>
         <Box>
           <Button variant='outlined'>Participants</Button>
@@ -51,7 +55,7 @@ const ChatRoom = () => {
       </Grid>
       <Divider />
       <Grid item className={classes.chatRoomMessagesContainer}>
-        {/* <Messages messages={messagesList} /> */}
+        <Messages messages={messagesList} />
       </Grid>
       <Grid item className={classes.messageContainer}>
         <InputMessage

@@ -10,8 +10,10 @@ import useStyles from '../../shared/styles/Auth.styles';
 import { useFormik } from 'formik';
 import { useCallback } from 'react';
 import Background from '../Background/Background';
+import { useAuth } from '../../context/authContext';
 
 const Login = () => {
+  const { state, dispatch } = useAuth();
   const classes = useStyles();
   const formik = useFormik({
     initialValues: {
@@ -36,8 +38,25 @@ const Login = () => {
       name: values.name,
       password: values.password,
     };
-    console.log(requestData);
+    onLoginHandler(requestData);
+    console.log('test');
   }, []);
+
+  const onLoginHandler = async (requestData: any) => {
+    dispatch({ type: 'LOGIN_REQUEST' });
+    console.log('triggers');
+    try {
+      console.log('start');
+      const dummyData = await new Promise((resolve, reject) =>
+        setTimeout(() => resolve('ITS OK'), 2000)
+      );
+      dispatch({ type: 'LOGIN_SUCCESS', payload: dummyData });
+    } catch (error) {
+      dispatch({ type: 'LOGIN_SUCCESS', payload: error });
+    }
+  };
+
+  console.log(state.status);
 
   return (
     <>
@@ -89,6 +108,9 @@ const Login = () => {
           color='primary'
           variant='contained'
           size='large'
+          onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
+            formik.handleSubmit()
+          }
           className={classes.button}
           disableElevation
           disabled={!(formik.isValid && formik.dirty)}

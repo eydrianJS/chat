@@ -27,6 +27,8 @@ const SidebarChat = () => {
         </Box>
         <Typography variant='subtitle1'>Hello, Sebastian</Typography>
       </Paper>
+      <Box>Current room:</Box>
+      <Box>Public</Box>
       <RoomList title='Rooms' />
       <Divider />
       <RoomList title='Private Rooms' />
