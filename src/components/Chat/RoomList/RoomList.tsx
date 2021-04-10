@@ -13,6 +13,7 @@ import { globalColors } from '../../../shared/styles/Auth.styles';
 
 type Props = {
   title: string;
+  rooms: any[];
 };
 
 const CustomListItem = styled(ListItem)({
@@ -22,8 +23,9 @@ const CustomListItem = styled(ListItem)({
   },
 });
 
-const RoomList: React.FC<Props> = ({ title }) => {
+const RoomList: React.FC<Props> = ({ title, rooms }) => {
   const [open, setOpen] = useState(true);
+  console.log(rooms);
 
   const handleOpen = () => setOpen(!open);
   return (
@@ -34,12 +36,17 @@ const RoomList: React.FC<Props> = ({ title }) => {
       </CustomListItem>
       <Collapse in={open}>
         <List component='div' disablePadding>
-          <CustomListItem button>
-            <ListItemIcon>
-              <MeetingRoomIcon />
-            </ListItemIcon>
-            <ListItemText>Room1</ListItemText>
-          </CustomListItem>
+          {rooms &&
+            rooms.map((room) => (
+              <CustomListItem button>
+                <ListItemIcon>
+                  <MeetingRoomIcon />
+                </ListItemIcon>
+                <ListItemText style={{ textTransform: 'capitalize' }}>
+                  {room.name}
+                </ListItemText>
+              </CustomListItem>
+            ))}
         </List>
       </Collapse>
     </List>

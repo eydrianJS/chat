@@ -10,6 +10,7 @@ import useStyles from '../../shared/styles/Auth.styles';
 import * as Yup from 'yup';
 import { displayErrorInput } from '../../shared/functions/displayErrorInput';
 import { useCallback } from 'react';
+import { axios } from '../../shared/configAxios';
 
 const Register = () => {
   const classes = useStyles();
@@ -42,7 +43,10 @@ const Register = () => {
       name: values.name,
       password: values.password,
     };
-    console.log(requestData);
+    axios
+      .post('/register', requestData)
+      .then((response) => console.log(response))
+      .catch((err) => console.log(err));
   }, []);
 
   return (
@@ -106,6 +110,7 @@ const Register = () => {
           variant='contained'
           size='large'
           className={classes.button}
+          onClick={() => formik.handleSubmit()}
           disableElevation
           disabled={!(formik.isValid && formik.dirty)}
         >

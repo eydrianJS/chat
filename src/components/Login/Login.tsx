@@ -11,6 +11,7 @@ import { useFormik } from 'formik';
 import { useCallback } from 'react';
 import Background from '../Background/Background';
 import { useAuth } from '../../context/authContext';
+import { axios } from '../../shared/configAxios';
 
 const Login = () => {
   const { state, dispatch } = useAuth();
@@ -39,24 +40,18 @@ const Login = () => {
       password: values.password,
     };
     onLoginHandler(requestData);
-    console.log('test');
   }, []);
 
   const onLoginHandler = async (requestData: any) => {
     dispatch({ type: 'LOGIN_REQUEST' });
-    console.log('triggers');
-    try {
-      console.log('start');
-      const dummyData = await new Promise((resolve, reject) =>
-        setTimeout(() => resolve('ITS OK'), 2000)
+    axios
+      .post('/login', requestData)
+      .then((response) =>
+        dispatch({ type: 'LOGIN_SUCCESS', payload: response.data })
       );
-      dispatch({ type: 'LOGIN_SUCCESS', payload: dummyData });
-    } catch (error) {
-      dispatch({ type: 'LOGIN_SUCCESS', payload: error });
-    }
   };
 
-  console.log(state.status);
+  console.log(process.env.REACT_APP_API_BASE_URL);
 
   return (
     <>

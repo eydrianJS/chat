@@ -6,6 +6,9 @@ import useStyles from './ChatRoom.styles';
 import io from 'socket.io-client';
 import { IRoomResponse } from '../../../shared/interfaces/IRoomResponse';
 import { IMessageResponse } from '../../../shared/interfaces/IMessageResponse';
+import CreateRoomModal from '../../CreateRoomModal/CreateRoomModal';
+import { useParams } from 'react-router-dom';
+import { axios } from '../../../shared/configAxios';
 
 let socket: SocketIOClient.Socket = io('localhost:8080', {
   transports: ['websocket', 'polling', 'flashsocket'],
@@ -13,6 +16,7 @@ let socket: SocketIOClient.Socket = io('localhost:8080', {
 
 const ChatRoom = () => {
   const classes = useStyles();
+  const { roomId } = useParams<{ roomId: string }>();
   const [messageField, setMessageField] = useState('');
   const [messagesList, setMessagesList] = useState<IMessageResponse[]>([]);
   const [roomData, setRoomData] = useState<IRoomResponse | undefined>(
@@ -23,6 +27,7 @@ const ChatRoom = () => {
     setMessageField(event.target.value);
 
   useEffect(() => {
+    // TODO add axtios for fetching rooms. pass to then sockets below.
     socket.on('chatHistory', (messages: IMessageResponse[]) => {
       setMessagesList((messagesList) => [...messagesList, ...messages]);
     });
@@ -34,6 +39,13 @@ const ChatRoom = () => {
     socket.on('message', (messages: IMessageResponse) => {
       setMessagesList((messagesList) => [...messagesList, messages]);
     });
+  }, []);
+
+  useEffect(() => {
+    axios
+      .get(`/room/${roomId}`)
+      .then((response) => console.log(response))
+      .catch((err) => console.error(err));
   }, []);
 
   const handleSubmit = (event: any) => {
