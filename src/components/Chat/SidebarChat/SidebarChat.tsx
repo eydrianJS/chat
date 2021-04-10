@@ -17,10 +17,11 @@ import { useEffect, useState } from 'react';
 import CreateRoomModal from '../../CreateRoomModal/CreateRoomModal';
 import AddIcon from '@material-ui/icons/Add';
 import InviteUserModal from '../../InviteUserModal/InviteUserModal';
+import { useAuth } from '../../../context/authContext';
 
 const SidebarChat = () => {
   const classes = useStyles();
-
+  const { state, dispatch } = useAuth();
   const [open, setOpen] = useState(false);
   const [openInviteModal, setOpenInviteModal] = useState(false);
   const [roomList, setRoomList] = useState<any[]>([]);
@@ -42,11 +43,24 @@ const SidebarChat = () => {
     callback();
   };
 
+  const getAllRooms = () => {
+    axios
+      .get('/room')
+      .then((response) => {
+        setRoomList(response.data);
+      })
+      .catch((err) => console.error(err));
+  };
+
+  const config = {
+    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+  };
+
   const createRoom = (roomName: string, isPrivate: boolean) => {
     axios
-      .post('/room', { name: roomName, isPrivate: isPrivate })
-      .then((res) => {
-        setRoomList((prevState: any[]) => [...prevState, ...res.data]);
+      .post('/room', { name: roomName, isPrivate: isPrivate }, config)
+      .then(() => {
+        getAllRooms();
         setOpen(false);
       })
       .catch((err) => console.error(err));
@@ -56,14 +70,9 @@ const SidebarChat = () => {
     console.log(userId, roomId);
   };
 
-  useEffect(() => {
-    axios
-      .get('/room')
-      .then((response) => {
-        setRoomList(response.data);
-      })
-      .catch((err) => console.error(err));
-  }, []);
+  useEffect(() => getAllRooms(), []);
+
+  console.log(state.user.token);
 
   return (
     <Grid container direction='column' style={{ height: '100%' }}>

@@ -2,19 +2,29 @@ import Box from '@material-ui/core/Box/Box';
 import Button from '@material-ui/core/Button/Button';
 import TextField from '@material-ui/core/TextField/TextField';
 import Typography from '@material-ui/core/Typography/Typography';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { displayErrorInput } from '../../shared/functions/displayErrorInput';
 import routeBuilders from '../../shared/routeBuilders';
 import * as Yup from 'yup';
 import useStyles from '../../shared/styles/Auth.styles';
 import { useFormik } from 'formik';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import Background from '../Background/Background';
-import { useAuth } from '../../context/authContext';
+import {
+  AUTH_FAILURE,
+  AUTH_REQUEST,
+  AUTH_SUCCESS,
+  useAuth,
+} from '../../context/authContext';
 import { axios } from '../../shared/configAxios';
+import { RequestStatus } from '../../shared/RequestStatus';
+import AlertMessage from '../Alert/Alert';
 
 const Login = () => {
   const { state, dispatch } = useAuth();
+  const [openAlert, setOpenAlert] = useState(false);
+  const history = useHistory();
   const classes = useStyles();
   const formik = useFormik({
     initialValues: {
@@ -43,15 +53,18 @@ const Login = () => {
   }, []);
 
   const onLoginHandler = async (requestData: any) => {
-    dispatch({ type: 'LOGIN_REQUEST' });
+    dispatch({ type: AUTH_REQUEST });
     axios
       .post('/login', requestData)
-      .then((response) =>
-        dispatch({ type: 'LOGIN_SUCCESS', payload: response.data })
-      );
+      .then((response) => {
+        dispatch({ type: AUTH_SUCCESS, payload: response.data });
+        history.push('/chat/room/public');
+      })
+      .catch((err) => {
+        dispatch({ type: AUTH_FAILURE, payload: err });
+        setOpenAlert(true);
+      });
   };
-
-  console.log(process.env.REACT_APP_API_BASE_URL);
 
   return (
     <>
@@ -99,19 +112,23 @@ const Login = () => {
           variant='outlined'
           required
         />
-        <Button
-          color='primary'
-          variant='contained'
-          size='large'
-          onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
-            formik.handleSubmit()
-          }
-          className={classes.button}
-          disableElevation
-          disabled={!(formik.isValid && formik.dirty)}
-        >
-          Login
-        </Button>
+        {!(state.status === RequestStatus.ongoing) ? (
+          <Button
+            color='primary'
+            variant='contained'
+            size='large'
+            onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
+              formik.handleSubmit()
+            }
+            className={classes.button}
+            disableElevation
+            disabled={!(formik.isValid && formik.dirty)}
+          >
+            Login
+          </Button>
+        ) : (
+          <CircularProgress />
+        )}
         <Box className={classes.registerDescription}>
           You don't have account?
           <Link to={routeBuilders.register()} className={classes.link}>
@@ -119,6 +136,11 @@ const Login = () => {
           </Link>
         </Box>
       </Box>
+      <AlertMessage
+        open={openAlert}
+        handleClose={() => setOpenAlert(false)}
+        duration={3000}
+      />
       <Background />
     </>
   );

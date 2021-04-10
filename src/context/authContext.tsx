@@ -1,17 +1,17 @@
 import { RequestStatus } from '../shared/RequestStatus';
 import React, { useReducer, createContext } from 'react';
 
-const LOGIN_REQUEST = 'LOGIN_REQUEST';
-const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
-const LOGIN_FAILURE = 'LOGIN_FAILURE';
-const REGISTER_REQUEST = 'REGISTER_REQUEST';
-const REGISTER_SUCCESS = 'REGISTER_SUCCESS';
-const REGISTER_FAILURE = 'REGISTER_FAILURE';
+export const AUTH_REQUEST = 'AUTH_REQUEST';
+export const AUTH_SUCCESS = 'AUTH_SUCCESS';
+export const AUTH_FAILURE = 'AUTH_FAILURE';
+export const REGISTER_REQUEST = 'REGISTER_REQUEST';
+export const REGISTER_SUCCESS = 'REGISTER_SUCCESS';
+export const REGISTER_FAILURE = 'REGISTER_FAILURE';
 
 type Types =
-  | typeof LOGIN_REQUEST
-  | typeof LOGIN_FAILURE
-  | typeof LOGIN_SUCCESS
+  | typeof AUTH_REQUEST
+  | typeof AUTH_FAILURE
+  | typeof AUTH_SUCCESS
   | typeof REGISTER_REQUEST
   | typeof REGISTER_SUCCESS
   | typeof REGISTER_FAILURE;
@@ -25,11 +25,13 @@ type Dispatch = (action: Action) => void;
 
 type State = {
   status: RequestStatus;
+  user: { token: string };
   error: string;
 };
 
 const initialState = {
   status: RequestStatus.pending,
+  user: { token: '' },
   error: '',
 };
 
@@ -39,12 +41,16 @@ const AuthStateContext = createContext<
 
 const authReducer = (state: State = initialState, action: Action) => {
   switch (action.type) {
-    case LOGIN_REQUEST:
+    case AUTH_REQUEST:
       return { ...state, status: RequestStatus.ongoing };
-    case LOGIN_SUCCESS:
-      console.log(action.payload);
-      return { ...state, status: RequestStatus.success };
-    case LOGIN_FAILURE:
+    case AUTH_SUCCESS:
+      localStorage.setItem('token', action.payload.token);
+      return {
+        ...state,
+        status: RequestStatus.success,
+        user: action.payload.token,
+      };
+    case AUTH_FAILURE:
       return { ...state, status: RequestStatus.failed, error: action.payload };
     default:
       return state;

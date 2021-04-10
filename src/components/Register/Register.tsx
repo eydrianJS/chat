@@ -4,16 +4,28 @@ import TextField from '@material-ui/core/TextField/TextField';
 import Typography from '@material-ui/core/Typography/Typography';
 import Background from '../Background/Background';
 import { useFormik } from 'formik';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import routeBuilders from '../../shared/routeBuilders';
 import useStyles from '../../shared/styles/Auth.styles';
 import * as Yup from 'yup';
 import { displayErrorInput } from '../../shared/functions/displayErrorInput';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import { axios } from '../../shared/configAxios';
+import AlertMessage from '../Alert/Alert';
+import {
+  AUTH_FAILURE,
+  AUTH_REQUEST,
+  AUTH_SUCCESS,
+  useAuth,
+} from '../../context/authContext';
+import { RequestStatus } from '../../shared/RequestStatus';
 
 const Register = () => {
   const classes = useStyles();
+  const { state, dispatch } = useAuth();
+  const [openAlert, setOpenAlert] = useState(false);
+  const history = useHistory();
   const formik = useFormik({
     initialValues: {
       email: '',
@@ -37,7 +49,7 @@ const Register = () => {
   });
 
   const onSave = useCallback((values) => {
-    //TODO add here type for data when model will be ready.
+    dispatch({ type: AUTH_REQUEST });
     const requestData = {
       email: values.email,
       name: values.name,
@@ -45,8 +57,14 @@ const Register = () => {
     };
     axios
       .post('/register', requestData)
-      .then((response) => console.log(response))
-      .catch((err) => console.log(err));
+      .then((response) => {
+        dispatch({ type: AUTH_SUCCESS, payload: response.data });
+        history.push('/chat/room/public');
+      })
+      .catch((err) => {
+        dispatch({ type: AUTH_FAILURE, payload: err });
+        setOpenAlert(true);
+      });
   }, []);
 
   return (
@@ -105,17 +123,21 @@ const Register = () => {
           variant='outlined'
           required
         />
-        <Button
-          color='primary'
-          variant='contained'
-          size='large'
-          className={classes.button}
-          onClick={() => formik.handleSubmit()}
-          disableElevation
-          disabled={!(formik.isValid && formik.dirty)}
-        >
-          Register
-        </Button>
+        {!(state.status === RequestStatus.ongoing) ? (
+          <Button
+            color='primary'
+            variant='contained'
+            size='large'
+            className={classes.button}
+            onClick={() => formik.handleSubmit()}
+            disableElevation
+            disabled={!(formik.isValid && formik.dirty)}
+          >
+            Register
+          </Button>
+        ) : (
+          <CircularProgress />
+        )}
         <Box className={classes.registerDescription}>
           Do you have account?
           <Link to={routeBuilders.login()} className={classes.link}>
@@ -123,6 +145,11 @@ const Register = () => {
           </Link>
         </Box>
       </Box>
+      <AlertMessage
+        open={openAlert}
+        handleClose={() => setOpenAlert(false)}
+        duration={3000}
+      />
       <Background />
     </>
   );
