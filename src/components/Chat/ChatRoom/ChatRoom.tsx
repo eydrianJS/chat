@@ -7,10 +7,12 @@ import io from 'socket.io-client';
 import { IRoomResponse } from '../../../shared/interfaces/IRoomResponse';
 import { IMessageResponse } from '../../../shared/interfaces/IMessageResponse';
 import CreateRoomModal from '../../CreateRoomModal/CreateRoomModal';
+import jwtDecode from 'jwt-decode';
 import { useParams } from 'react-router-dom';
 import { axios } from '../../../shared/configAxios';
 
-let socket: SocketIOClient.Socket = io('localhost:8080', {
+const a: string = process.env.REACT_APP_API_BASE_URL ?? '';
+let socket: SocketIOClient.Socket = io(a, {
   transports: ['websocket', 'polling', 'flashsocket'],
 });
 
@@ -19,9 +21,7 @@ const ChatRoom = () => {
   const { roomId } = useParams<{ roomId: string }>();
   const [messageField, setMessageField] = useState('');
   const [messagesList, setMessagesList] = useState<IMessageResponse[]>([]);
-  const [roomData, setRoomData] = useState<IRoomResponse | undefined>(
-    undefined
-  );
+  const [roomData, setRoomData] = useState<IRoomResponse | undefined>(undefined);
 
   const handleMessage = (event: ChangeEvent<HTMLInputElement>) =>
     setMessageField(event.target.value);
@@ -35,11 +35,24 @@ const ChatRoom = () => {
   }, []);
 
   useEffect(() => {
-    socket.emit('joinToPublicRoom', { userId: '60571a776db2a42e1257abef' });
+    const token: any = jwtDecode(localStorage.getItem('token') ?? '');
+    socket.emit('joinToPublicRoom', { userId: token?.uid });
     socket.on('message', (messages: IMessageResponse) => {
       setMessagesList((messagesList) => [...messagesList, messages]);
     });
   }, []);
+
+  // useEffect(() => {
+  //   console.log('🚀 ~ file: ChatRoom.tsx ~ line 43 ~ useEffect ~ useEffect');
+  //   socket.emit('joinToPrivateRoom', {
+  //     userId: '607bf8dce37d850934f53cb5',
+  //     roomId: '607bf9eae37d850934f53cb6',
+  //   });
+  //   socket.on('private_message', (messages: IMessageResponse) => {
+  //     console.log('🚀 ~ file: ChatRoom.tsx ~ line 48 ~ socket.on ~ messages', messages);
+  //     // setMessagesList((messagesList) => [...messagesList, messages]);
+  //   });
+  // }, []);
 
   useEffect(() => {
     axios
@@ -51,18 +64,20 @@ const ChatRoom = () => {
   const handleSubmit = (event: any) => {
     event.preventDefault() as React.SyntheticEvent;
     if (messageField) {
-      socket.emit('chatMessage', messageField, () => setMessageField(''));
+      console.log('🚀 ~ file: ChatRoom.tsx ~ line 67 ~ handleSubmit ~ messageField', messageField);
+      socket.emit('chatMessage', messageField);
+      setMessageField('');
     }
   };
 
   return (
-    <Grid container direction='column' className={classes.chatRoomContainer}>
+    <Grid container direction="column" className={classes.chatRoomContainer}>
       <Grid item className={classes.infoBarContainer}>
-        <Typography variant='h5' style={{ fontWeight: 700 }}>
+        <Typography variant="h5" style={{ fontWeight: 700 }}>
           {roomData?.room}
         </Typography>
         <Box>
-          <Button variant='outlined'>Participants</Button>
+          <Button variant="outlined">Participants</Button>
         </Box>
       </Grid>
       <Divider />
