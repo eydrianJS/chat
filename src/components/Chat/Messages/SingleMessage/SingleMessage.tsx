@@ -10,9 +10,7 @@ type Props = {
 
 const getTwoFirstLetters = (name: string) => name.substr(0, 2).toUpperCase();
 
-const SingleMessage: React.FC<Props> = ({
-  message: { text, username, time },
-}) => {
+const SingleMessage: React.FC<Props> = ({ message: { text, username, time } }) => {
   const isSentByCurrentUser = true;
   const classes = useStyles();
 
@@ -39,14 +37,11 @@ const SingleMessage: React.FC<Props> = ({
             <Box order={2} pl={2}>
               <Avatar>{getTwoFirstLetters(username)}</Avatar>
             </Box>
-            <Box
-              className={`${classes.messageBox} ${classes.lightBackground}`}
-              order={1}
-            >
+            <Box className={`${classes.messageBox} ${classes.lightBackground}`} order={1}>
               {text}
             </Box>
           </Box>
-          <Box display='flex' className={classes.justifyEnd} pr={7}>
+          <Box display="flex" className={classes.justifyEnd} pr={7}>
             {time}
           </Box>
         </Box>
@@ -54,11 +49,16 @@ const SingleMessage: React.FC<Props> = ({
       break;
     default:
       message = (
-        <Box className={`${classes.messageContainer} ${classes.justifyStart}`}>
-          <Box className={`${classes.messageBox} ${classes.darkBackground}`}>
-            Hi mark!
+        <>
+          <Box className={`${classes.messageContainer} ${classes.justifyStart}`}>
+            <Box style={{ color: 'black' }}>
+              {username} {time}
+            </Box>
           </Box>
-        </Box>
+          <Box className={`${classes.messageContainer} ${classes.justifyStart}`}>
+            <Box className={`${classes.messageBox} ${classes.darkBackground}`}>{text}</Box>
+          </Box>
+        </>
       );
       break;
   }

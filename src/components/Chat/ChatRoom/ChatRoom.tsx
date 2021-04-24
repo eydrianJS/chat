@@ -10,6 +10,7 @@ import CreateRoomModal from '../../CreateRoomModal/CreateRoomModal';
 import jwtDecode from 'jwt-decode';
 import { useParams } from 'react-router-dom';
 import { axios } from '../../../shared/configAxios';
+import SingleMessage from '../Messages/SingleMessage/SingleMessage';
 
 const a: string = process.env.REACT_APP_API_BASE_URL ?? '';
 let socket: SocketIOClient.Socket = io(a, {
@@ -21,6 +22,7 @@ const ChatRoom = () => {
   const { roomId } = useParams<{ roomId: string }>();
   const [messageField, setMessageField] = useState('');
   const [messagesList, setMessagesList] = useState<IMessageResponse[]>([]);
+  const [chatHistory, setChatHistoryList] = useState<any>([]);
   const [roomData, setRoomData] = useState<IRoomResponse | undefined>(undefined);
 
   const handleMessage = (event: ChangeEvent<HTMLInputElement>) =>
@@ -40,19 +42,11 @@ const ChatRoom = () => {
     socket.on('message', (messages: IMessageResponse) => {
       setMessagesList((messagesList) => [...messagesList, messages]);
     });
+    socket.on('chatHisory', (messages: IMessageResponse) => {
+      console.log('🚀 ~ file: ChatRoom.tsx ~ line 44 ~ socket.on ~ messages', messages);
+      setChatHistoryList(messages);
+    });
   }, []);
-
-  // useEffect(() => {
-  //   console.log('🚀 ~ file: ChatRoom.tsx ~ line 43 ~ useEffect ~ useEffect');
-  //   socket.emit('joinToPrivateRoom', {
-  //     userId: '607bf8dce37d850934f53cb5',
-  //     roomId: '607bf9eae37d850934f53cb6',
-  //   });
-  //   socket.on('private_message', (messages: IMessageResponse) => {
-  //     console.log('🚀 ~ file: ChatRoom.tsx ~ line 48 ~ socket.on ~ messages', messages);
-  //     // setMessagesList((messagesList) => [...messagesList, messages]);
-  //   });
-  // }, []);
 
   useEffect(() => {
     axios
@@ -82,6 +76,10 @@ const ChatRoom = () => {
       </Grid>
       <Divider />
       <Grid item className={classes.chatRoomMessagesContainer}>
+        {chatHistory.map((msg: IMessageResponse) => {
+          console.log('🚀 ~ file: ChatRoom.tsx ~ line 80 ~ {chatHistory.map ~ msg', msg);
+          return <SingleMessage message={msg} />;
+        })}
         <Messages messages={messagesList} />
       </Grid>
       <Grid item className={classes.messageContainer}>
